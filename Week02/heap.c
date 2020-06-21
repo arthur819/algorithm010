@@ -1,3 +1,7 @@
+/**
+ * Note: The returned array must be malloced, assume caller calls free().
+ */
+
 #define MAX_SIZE    (10000)
 #define min(a,b)    ((a) > (b) ? (b) : (a))
 
@@ -19,25 +23,16 @@ void insert(struct binary_heap *heap, int val){
 
     index = ++(heap->size) - 1;
     heap->arr[index] = val;
-    while (index > 0 && val < heap->arr[(index - 1) / 2]) {
-        heap->arr[index] = heap->arr[(index - 1) / 2];
-        index = (index - 1) / 2;
+    while (index > 0 && val < heap->arr[(index - 1) >> 1]) {
+        heap->arr[index] = heap->arr[(index - 1) >> 1];
+        index = (index - 1) >> 1;
     }
     heap->arr[index] = val;
     /* debug usage
-    for (i = 0; i < b_min_heap.size; ++i)
-        printf("%d   ", b_min_heap.arr[i]);
+    for (i = 0; i < heap->size; ++i)
+        printf("%d   ", heap->arr[i]);
     printf("\n");
     */
-}
-
-int size2level(int size){
-    int tmp = 1, cnt = 0, i;
-    while (tmp < size) {
-        tmp = tmp << 1;
-        ++cnt;
-    }
-    return cnt;
 }
 
 void get_and_pop_min(struct binary_heap *heap, int *result){
@@ -51,8 +46,7 @@ void get_and_pop_min(struct binary_heap *heap, int *result){
     *result = arr[0];
     arr[0] = arr[heap->size - 1];
     --heap->size;
-    /*注意层数那个条件*/
-    while ((level < size2level(heap->size)) && (arr[index] > min(arr[(index << 1) + 1], arr[(index << 1) + 2]))) {
+    while ((index << 1) + 1 <= heap->size && (index << 1) + 2 < heap->size && (arr[index] > min(arr[(index << 1) + 1], arr[(index << 1) + 2]))) {
         ++level;
         if (arr[(index << 1) + 1] > arr[(index << 1) + 2]) {
             swap(&arr[index], &arr[(index << 1) + 2]);
